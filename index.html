@@ -279,6 +279,18 @@
       .contact-card p{color:var(--ink2);margin:0 0 14px}
       .big-link{font-size:1.15rem;font-weight:800;text-decoration:none;word-break:break-all;color:var(--brand)}
 
+      /* Complaints */
+      .complaint-card{background:var(--surface);border:1.5px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 8px 20px rgba(15,55,110,.07);margin-top:18px}
+      .complaint-form label{display:block;font-size:.84rem;font-weight:700;margin:12px 0 4px}
+      .complaint-form input[type="text"],.complaint-form input[type="email"],.complaint-form textarea,.complaint-form select{width:100%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit}
+      .complaint-form input:focus,.complaint-form textarea:focus,.complaint-form select:focus{outline:3px solid rgba(0,168,232,.25);border-color:var(--brand2)}
+      .complaint-form .btn{justify-content:center;margin-top:16px}
+      .complaint-status{margin:16px 0 0;border-radius:12px;padding:13px 15px;font-weight:700;font-size:.92rem;line-height:1.45}
+      .complaint-status[hidden]{display:none}
+      .complaint-status.ok{background:#e7f8ee;border:1.5px solid #2f9e5f;color:#14532d}
+      .complaint-status.err{background:#fdecec;border:1.5px solid #d64545;color:#7a1f1f}
+      @media (prefers-color-scheme: dark){ .complaint-status.ok{background:rgba(47,158,95,.16);color:#8fe3ae} .complaint-status.err{background:rgba(214,69,69,.16);color:#f3a3a3} }
+
       footer{margin-top:52px;background:#0b2242;color:#c8dcf5;padding:28px 0 38px;font-size:.92rem}
       footer .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between}
       footer strong{color:#fff}
@@ -577,12 +589,39 @@
           </div>
         </div>
       </section>
+
+      <!-- Complaints -->
+      <section id="complaints" aria-label="Complaints">
+        <div class="sec-head"><div><h2>Complaints</h2><p>Something wrong with your order? Tell us here and we'll put it right.</p></div></div>
+        <div class="complaint-card">
+          <form class="complaint-form" id="complaintForm">
+            <label for="cName">Your Name</label>
+            <input type="text" id="cName" name="name" required placeholder="e.g. James Smith" />
+            <label for="cEmail">Your Email</label>
+            <input type="email" id="cEmail" name="email" required placeholder="you@example.com" />
+            <label for="cOrderRef">Order Email or Product Name <span style="font-weight:400">(optional)</span></label>
+            <input type="text" id="cOrderRef" name="order_ref" placeholder="The email you ordered with, or the product name" />
+            <label for="cType">Complaint Type</label>
+            <select id="cType" name="complaint_type" required>
+              <option value="Late delivery">Late delivery</option>
+              <option value="Wrong item">Wrong item</option>
+              <option value="Damaged item">Damaged item</option>
+              <option value="Payment issue">Payment issue</option>
+              <option value="Other">Other</option>
+            </select>
+            <label for="cMessage">Your Complaint</label>
+            <textarea id="cMessage" name="message" rows="4" required placeholder="Please describe the problem in as much detail as you can"></textarea>
+            <div class="complaint-status" id="complaintStatus" role="status" hidden></div>
+            <button type="submit" class="btn btn-brand" id="sendComplaint">Send Complaint</button>
+          </form>
+        </div>
+      </section>
     </main>
 
     <footer>
       <div class="wrap">
         <span><strong>MINAL</strong> — Everything for pets, home &amp; everyday life</span>
-        <span>Phone: +92 326 6029308 · Email: abdulsallam0999@gmail.com</span>
+        <span>Phone: +92 326 6029308 · Email: abdulsallam0999@gmail.com · <a href="#complaints" style="color:#c8dcf5">Complaints</a></span>
         <span>Shipping: USA &amp; UK · Advance payment only — No Cash on Delivery</span>
       </div>
       <div class="wrap">
@@ -1553,6 +1592,48 @@
         }).then(function(){
           btn.disabled = false;
           btn.textContent = "Place Order";
+        });
+      });
+
+      // Complaint submission — sent to the same Formspree inbox, with its own subject
+      var complaintForm = document.getElementById("complaintForm");
+      var complaintStatus = document.getElementById("complaintStatus");
+      function showComplaintStatus(kind, msg){
+        complaintStatus.className = "complaint-status " + kind;
+        complaintStatus.textContent = msg;
+        complaintStatus.hidden = false;
+      }
+      complaintForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        if(!complaintForm.checkValidity()){ complaintForm.reportValidity(); return; }
+        var btn = document.getElementById("sendComplaint");
+        complaintStatus.hidden = true;
+        btn.disabled = true;
+        btn.textContent = "Sending complaint…";
+        var fd = new FormData();
+        fd.append("_subject", "New MINAL complaint");
+        fd.append("name", document.getElementById("cName").value.trim());
+        fd.append("email", document.getElementById("cEmail").value.trim());
+        fd.append("order_ref", document.getElementById("cOrderRef").value.trim());
+        fd.append("complaint_type", document.getElementById("cType").value);
+        fd.append("message", document.getElementById("cMessage").value.trim());
+        fetch(ORDER_ENDPOINT, {
+          method: "POST",
+          body: fd,
+          headers: { "Accept": "application/json" }
+        }).then(function(res){
+          if(res.ok){
+            complaintForm.reset();
+            showComplaintStatus("ok", "Thank you — your complaint has been received. We'll look into it and reply by email as soon as possible.");
+            toast("Complaint received — thank you!");
+          } else {
+            showComplaintStatus("err", "Sorry — your complaint couldn't be sent. Please try again, or email us directly at " + EMAIL + " and we'll take care of it.");
+          }
+        }).catch(function(){
+          showComplaintStatus("err", "Sorry — your complaint couldn't be sent. Please check your connection and try again, or email us directly at " + EMAIL + " and we'll take care of it.");
+        }).then(function(){
+          btn.disabled = false;
+          btn.textContent = "Send Complaint";
         });
       });
 

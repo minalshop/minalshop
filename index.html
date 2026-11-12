@@ -218,6 +218,15 @@
       .src-note{font-size:.78rem;font-weight:700;color:var(--brand)}
       .add-btn{margin-top:7px;background:var(--grad-brand);color:#fff;border:0;border-radius:13px;padding:12px;font-weight:800;width:100%;min-height:46px;box-shadow:0 8px 18px rgba(11,79,214,.25);transition:filter .15s ease, transform .15s ease}
       .add-btn:hover{filter:brightness(1.08)}
+      .card-actions{display:flex;gap:8px;margin-top:8px}
+      .order-btn{flex:1;background:var(--grad-warm);color:#fff;border:0;border-radius:13px;padding:12px;font-weight:800;min-height:46px;box-shadow:0 8px 18px rgba(255,122,60,.30);transition:filter .15s ease, transform .15s ease}
+      .order-btn:hover{filter:brightness(1.07)}
+      .fav-btn{flex:0 0 46px;width:46px;min-height:46px;display:grid;place-items:center;background:var(--surface);border:2px solid var(--line);border-radius:13px;padding:0;transition:border-color .15s ease, background .15s ease, transform .15s ease}
+      .fav-btn svg{width:22px;height:22px;fill:none;stroke:var(--pink);stroke-width:2;stroke-linejoin:round;transition:fill .15s ease}
+      .fav-btn:hover{border-color:var(--pink)}
+      .fav-btn:active{transform:scale(.92)}
+      .fav-btn[aria-pressed="true"]{border-color:var(--pink);background:color-mix(in srgb, var(--pink) 12%, var(--surface))}
+      .fav-btn[aria-pressed="true"] svg{fill:var(--pink)}
       .add-btn:active{transform:scale(.98)}
       .add-btn.added{background:linear-gradient(120deg,#00b894,#00c2a8);color:#fff}
       .empty{display:none;text-align:center;color:var(--ink2);padding:36px 0}
@@ -335,7 +344,7 @@
       .checkout{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
       .checkout h3{font-size:1.02rem;margin-bottom:10px}
       .checkout label{display:block;font-size:.84rem;font-weight:700;margin:10px 0 4px}
-      .checkout input[type="text"],.checkout input[type="tel"],.checkout textarea,.checkout select{width:100%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit}
+      .checkout input[type="text"],.checkout input[type="email"],.checkout input[type="tel"],.checkout textarea,.checkout select{width:100%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit}
       .checkout input:focus,.checkout textarea:focus,.checkout select:focus{outline:3px solid rgba(0,168,232,.25);border-color:var(--brand2)}
       .pay-opts{display:grid;gap:8px;margin-top:6px}
       .pay-opt{display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;min-height:48px}
@@ -344,6 +353,12 @@
       .pay-opt small{display:block;font-weight:400;color:var(--ink2)}
       .order-btns{display:grid;gap:10px;margin-top:16px}
       .order-btns .btn{justify-content:center;width:100%}
+      .order-status{margin:0 18px 14px;border-radius:12px;padding:13px 15px;font-weight:700;font-size:.92rem;line-height:1.45}
+      .order-status[hidden]{display:none}
+      .order-status.ok{background:#e7f8ee;border:1.5px solid #2f9e5f;color:#14532d}
+      .order-status.err{background:#fdecec;border:1.5px solid #d64545;color:#7a1f1f}
+      @media (prefers-color-scheme: dark){ .order-status.ok{background:rgba(47,158,95,.16);color:#8fe3ae} .order-status.err{background:rgba(214,69,69,.16);color:#f3a3a3} }
+      .order-btns .btn[disabled]{opacity:.6;pointer-events:none}
       .cart-empty{text-align:center;color:var(--ink2);padding:30px 0}
       .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,80px);background:#0f2342;color:#fff;padding:12px 22px;border-radius:999px;font-weight:700;z-index:80;transition:transform .25s;max-width:92vw;text-align:center;box-shadow:var(--shadow-lg)}
       .toast.show{transform:translate(-50%,0)}
@@ -382,7 +397,7 @@
           <p class="lead">Every product in store is a proven favourite — pet toys, grooming gear and beds, plus kitchen helpers, tech accessories, beauty, fashion, mobile accessories, home decor, smart home, fitness, kids, baby, car, office, garden and tool essentials. Everything is small and lightweight, so shipping stays cheap. We quality-check each item before dispatch and deliver across the USA and UK.</p>
           <div class="hero-ctas">
             <a class="btn btn-brand" href="#shop">Shop Now</a>
-            <a class="btn btn-ghost" href="mailto:abdulsallam0999@gmail.com?subject=MINAL%20Order">Order by Email</a>
+            <button type="button" class="btn btn-ghost" id="heroOrder">Order Now</button>
           </div>
           <div class="hero-points">
             <span>✓ Small &amp; lightweight — ships cheap</span><span>✓ Quality-checked before dispatch</span>
@@ -487,6 +502,8 @@
           <button class="chip" data-cat="fitness" aria-pressed="false">Fitness</button>
           <button class="chip" data-cat="kids" aria-pressed="false">Kids</button>
           <button class="chip" data-cat="tools" aria-pressed="false">Tools</button>
+          <span class="sep" aria-hidden="true"></span>
+          <button class="chip" id="favChip" aria-pressed="false"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" style="vertical-align:-2px;margin-right:5px"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>Favourites (<span id="favCount">0</span>)</button>
           <select class="sortsel" id="sortSel" aria-label="Sort products">
             <option value="featured">Sort: Featured</option>
             <option value="low">Price: Low to High</option>
@@ -584,6 +601,7 @@
         <button class="icon-btn" id="cartClose" aria-label="Close cart">✕</button>
       </header>
       <div class="items" id="cartItems"></div>
+      <div class="order-status" id="orderStatus" role="status" hidden></div>
       <div class="foot" id="cartFoot">
         <div class="tot"><span>Subtotal</span><span id="subTotal">$0.00</span></div>
         <div class="tot"><span>Shipping</span><span id="delFee">$6.95</span></div>
@@ -593,18 +611,22 @@
         <form class="checkout" id="checkoutForm">
           <h3>Delivery Details</h3>
           <label for="fName">Full Name</label>
-          <input type="text" id="fName" required placeholder="e.g. James Smith" />
-          <label for="fPhone">Phone Number</label>
-          <input type="tel" id="fPhone" required placeholder="With country code" />
+          <input type="text" id="fName" name="name" required placeholder="e.g. James Smith" />
+          <label for="fEmail">Email Address</label>
+          <input type="email" id="fEmail" name="email" required placeholder="you@example.com" />
+          <label for="fPhone">Phone Number <span style="font-weight:400">(optional)</span></label>
+          <input type="tel" id="fPhone" name="phone" placeholder="With country code" />
           <label for="fCountry">Country</label>
-          <select id="fCountry" required>
+          <select id="fCountry" name="country" required>
             <option value="United States">United States</option>
             <option value="United Kingdom">United Kingdom</option>
           </select>
           <label for="fCity">City</label>
-          <input type="text" id="fCity" required placeholder="e.g. New York / London" />
-          <label for="fAddr">Full Address</label>
-          <textarea id="fAddr" rows="2" required placeholder="Street, building, postcode / ZIP"></textarea>
+          <input type="text" id="fCity" name="city" required placeholder="e.g. New York / London" />
+          <label for="fAddr">Street Address</label>
+          <textarea id="fAddr" name="street" rows="2" required placeholder="Street, building, apartment"></textarea>
+          <label for="fPostcode">Postcode / ZIP</label>
+          <input type="text" id="fPostcode" name="postcode" required placeholder="e.g. 10001 / SW1A 1AA" />
 
           <h3 style="margin-top:16px">Payment Method — Advance Only</h3>
           <p style="font-size:.84rem;color:var(--ink2);margin:4px 0 8px">Cash on Delivery is <strong>not</strong> available. Pick Binance to see the payment details right here; bank details are shared by email after you send your order.</p>
@@ -624,7 +646,7 @@
           </div>
 
           <div class="order-btns">
-            <button type="button" class="btn btn-brand" id="emailOrder">Order by Email</button>
+            <button type="submit" class="btn btn-brand" id="placeOrder">Place Order</button>
           </div>
         </form>
       </div>
@@ -1173,8 +1195,38 @@
       var FREE_LIMIT = 75, DELIVERY = 6.95;
       var GBP_RATE = 0.79; // display conversion from USD
 
-      var state = { pet:"all", cat:"all", q:"", sort:"featured", curr:"USD" };
+      var state = { pet:"all", cat:"all", q:"", sort:"featured", curr:"USD", favOnly:false };
       var cart = {}; // id -> qty
+
+      // Favourites — saved in this browser's localStorage so hearts persist across visits on the same device.
+      var FAV_KEY = "minalFavourites";
+      var favs = {};
+      try{
+        (JSON.parse(localStorage.getItem(FAV_KEY) || "[]") || []).forEach(function(id){ favs[id] = true; });
+      }catch(e){}
+      var HEART_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+      function isFav(id){ return !!favs[id]; }
+      function favTotal(){ return Object.keys(favs).length; }
+      function saveFavs(){
+        try{ localStorage.setItem(FAV_KEY, JSON.stringify(Object.keys(favs).map(function(k){ return parseInt(k,10); }))); }catch(e){}
+      }
+      function updateFavChip(){
+        var c = document.getElementById("favCount");
+        if(c) c.textContent = favTotal();
+        var chip = document.getElementById("favChip");
+        if(chip) chip.setAttribute("aria-pressed", state.favOnly ? "true" : "false");
+      }
+      function toggleFav(id, btn){
+        if(favs[id]) delete favs[id]; else favs[id] = true;
+        saveFavs(); updateFavChip();
+        if(state.favOnly){ render(); }
+        else if(btn){
+          btn.setAttribute("aria-pressed", isFav(id) ? "true" : "false");
+          var p = PRODUCTS.filter(function(x){return x.id===id})[0];
+          btn.setAttribute("aria-label", (isFav(id) ? "Remove " : "Save ") + (p ? p.name : "product") + (isFav(id) ? " from" : " to") + " favourites");
+        }
+        toast(isFav(id) ? "Saved to favourites" : "Removed from favourites");
+      }
 
       function money(n){
         return state.curr === "GBP" ? "£" + (n * GBP_RATE).toFixed(2) : "$" + n.toFixed(2);
@@ -1209,12 +1261,19 @@
           var okPet = state.pet==="all" || p.pet===state.pet || p.pet==="both";
           var okCat = state.cat==="all" || p.cat===state.cat;
           var okQ = !state.q || (p.name+" "+p.desc+" "+catLabel(p.cat)).toLowerCase().indexOf(state.q)>-1;
-          return okPet && okCat && okQ;
+          var okFav = !state.favOnly || isFav(p.id);
+          return okPet && okCat && okQ && okFav;
         });
         if(state.sort==="low") list = list.slice().sort(function(a,b){return a.price-b.price});
         if(state.sort==="high") list = list.slice().sort(function(a,b){return b.price-a.price});
         if(state.sort==="name") list = list.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
-        document.getElementById("emptyMsg").style.display = list.length ? "none" : "block";
+        var emptyEl = document.getElementById("emptyMsg");
+        emptyEl.style.display = list.length ? "none" : "block";
+        if(!list.length){
+          emptyEl.textContent = (state.favOnly && favTotal()===0)
+            ? "No favourites yet — tap the heart on any product to save it here."
+            : "No products found. Try a different search or filter.";
+        }
         grid.innerHTML = list.map(function(p){
           return '<article class="card">' +
             '<div class="ph" data-view="'+p.id+'" role="button" tabindex="0" aria-label="View full details of '+p.name+'"><img src="'+p.img+'" alt="'+p.name+'" loading="lazy" />' +
@@ -1226,6 +1285,10 @@
             '<div class="price-row"><span class="price">'+money(p.price)+'</span><span class="view-hint">Tap photo for full details</span></div>' +
             '<div class="pay-note">Advance payment only · No COD</div>' +
             '<button class="add-btn" data-add="'+p.id+'">Add to Cart</button>' +
+            '<div class="card-actions">' +
+            '<button class="order-btn" data-order="'+p.id+'">Order Now</button>' +
+            '<button class="fav-btn" data-fav="'+p.id+'" aria-pressed="'+(isFav(p.id) ? "true" : "false")+'" aria-label="'+(isFav(p.id) ? "Remove " : "Save ")+p.name+(isFav(p.id) ? " from" : " to")+' favourites" title="Save to favourites">'+HEART_SVG+'</button>' +
+            '</div>' +
             '</div></article>';
         }).join("");
         grid.querySelectorAll("[data-add]").forEach(function(b){
@@ -1233,6 +1296,17 @@
             addToCart(parseInt(b.getAttribute("data-add"),10));
             b.textContent = "Added ✓"; b.classList.add("added");
             setTimeout(function(){ b.textContent="Add to Cart"; b.classList.remove("added"); }, 1100);
+          });
+        });
+        grid.querySelectorAll("[data-order]").forEach(function(b){
+          b.addEventListener("click", function(){
+            addToCart(parseInt(b.getAttribute("data-order"),10));
+            openCart();
+          });
+        });
+        grid.querySelectorAll("[data-fav]").forEach(function(b){
+          b.addEventListener("click", function(){
+            toggleFav(parseInt(b.getAttribute("data-fav"),10), b);
           });
         });
         grid.querySelectorAll("[data-view]").forEach(function(el){
@@ -1349,6 +1423,7 @@
       function openCart(){ drawer.classList.add("open"); drawer.setAttribute("aria-hidden","false"); scrim.classList.add("open"); }
       function closeCart(){ drawer.classList.remove("open"); drawer.setAttribute("aria-hidden","true"); scrim.classList.remove("open"); }
       document.getElementById("cartOpen").addEventListener("click", openCart);
+      document.getElementById("heroOrder").addEventListener("click", openCart);
       document.getElementById("cartClose").addEventListener("click", closeCart);
       scrim.addEventListener("click", closeCart);
       document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ closeCart(); closeDetail(); } });
@@ -1375,6 +1450,12 @@
         });
       }
       bindChips("pet","pet"); bindChips("cat","cat");
+      document.getElementById("favChip").addEventListener("click", function(){
+        state.favOnly = !state.favOnly;
+        updateFavChip();
+        render();
+      });
+      updateFavChip();
       document.querySelectorAll("[data-cat-link]").forEach(function(t){
         t.addEventListener("click", function(){
           var cat = t.getAttribute("data-cat-link");
@@ -1401,10 +1482,13 @@
         lines.push("Total: " + money(t.total) + " (" + state.curr + ")");
         lines.push("");
         lines.push("Name: " + document.getElementById("fName").value.trim());
-        lines.push("Phone: " + document.getElementById("fPhone").value.trim());
+        lines.push("Email: " + document.getElementById("fEmail").value.trim());
+        var phone = document.getElementById("fPhone").value.trim();
+        if(phone) lines.push("Phone: " + phone);
         lines.push("Country: " + document.getElementById("fCountry").value);
         lines.push("City: " + document.getElementById("fCity").value.trim());
-        lines.push("Address: " + document.getElementById("fAddr").value.trim());
+        lines.push("Street Address: " + document.getElementById("fAddr").value.trim());
+        lines.push("Postcode / ZIP: " + document.getElementById("fPostcode").value.trim());
         lines.push("Payment Method (Advance): " + pay);
         if(pay.indexOf("Binance") > -1){
           lines.push("Binance Pay ID: 1023368489 (Name: Abdul Sallam)");
@@ -1420,13 +1504,56 @@
         if(!form.checkValidity()){ form.reportValidity(); return false; }
         return true;
       }
-      document.getElementById("emailOrder").addEventListener("click", function(){
+      // Order submission — sent to the shop's Formspree inbox (and emailed to the shop)
+      var ORDER_ENDPOINT = "https://formspree.io/f/moedvdwl";
+      var orderStatus = document.getElementById("orderStatus");
+      function showOrderStatus(kind, msg){
+        orderStatus.className = "order-status " + kind;
+        orderStatus.textContent = msg;
+        orderStatus.hidden = false;
+      }
+      document.getElementById("checkoutForm").addEventListener("submit", function(e){
+        e.preventDefault();
         if(!validateOrder()) return;
-        var mailLink = document.createElement("a");
-        mailLink.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent("MINAL Order") + "&body=" + encodeURIComponent(orderText());
-        document.body.appendChild(mailLink);
-        mailLink.click();
-        document.body.removeChild(mailLink);
+        var btn = document.getElementById("placeOrder");
+        var t = totals();
+        var pay = document.querySelector('input[name="pay"]:checked').value;
+        orderStatus.hidden = true;
+        btn.disabled = true;
+        btn.textContent = "Placing order…";
+        var fd = new FormData();
+        fd.append("_subject", "New MINAL order");
+        fd.append("name", document.getElementById("fName").value.trim());
+        fd.append("email", document.getElementById("fEmail").value.trim());
+        fd.append("phone", document.getElementById("fPhone").value.trim());
+        fd.append("street", document.getElementById("fAddr").value.trim());
+        fd.append("city", document.getElementById("fCity").value.trim());
+        fd.append("postcode", document.getElementById("fPostcode").value.trim());
+        fd.append("country", document.getElementById("fCountry").value);
+        fd.append("payment_method", pay);
+        fd.append("order", orderText());
+        fd.append("order_total", money(t.total) + " (" + state.curr + ")");
+        fetch(ORDER_ENDPOINT, {
+          method: "POST",
+          body: fd,
+          headers: { "Accept": "application/json" }
+        }).then(function(res){
+          if(res.ok){
+            cart = {};
+            renderCart();
+            document.getElementById("checkoutForm").reset();
+            syncCartPanels();
+            showOrderStatus("ok", "Thank you! Your order has been received. We'll email you the payment details shortly — please check your inbox to complete your advance payment.");
+            toast("Order received — thank you!");
+          } else {
+            showOrderStatus("err", "Sorry — your order couldn't be sent. Please try again, or email your order to " + EMAIL + " and we'll take care of it.");
+          }
+        }).catch(function(){
+          showOrderStatus("err", "Sorry — your order couldn't be sent. Please check your connection and try again, or email your order to " + EMAIL + " and we'll take care of it.");
+        }).then(function(){
+          btn.disabled = false;
+          btn.textContent = "Place Order";
+        });
       });
 
       // Binance payment details — copy button, page panel toggle, cart panel

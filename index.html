@@ -371,6 +371,11 @@
       .order-status.ok{background:#e7f8ee;border:1.5px solid #2f9e5f;color:#14532d}
       .order-status.err{background:#fdecec;border:1.5px solid #d64545;color:#7a1f1f}
       @media (prefers-color-scheme: dark){ .order-status.ok{background:rgba(47,158,95,.16);color:#8fe3ae} .order-status.err{background:rgba(214,69,69,.16);color:#f3a3a3} }
+      .order-copy{margin:0 18px 14px;border:1.5px solid var(--line);border-radius:12px;padding:13px 15px}
+      .order-copy[hidden]{display:none}
+      .order-copy p{font-size:.88rem;line-height:1.45;margin:0 0 10px}
+      .order-copy textarea{width:100%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:.84rem;resize:vertical}
+      .order-copy .btn{margin-top:10px;width:100%;justify-content:center}
       .order-btns .btn[disabled]{opacity:.6;pointer-events:none}
       .cart-empty{text-align:center;color:var(--ink2);padding:30px 0}
       .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,80px);background:#0f2342;color:#fff;padding:12px 22px;border-radius:999px;font-weight:700;z-index:80;transition:transform .25s;max-width:92vw;text-align:center;box-shadow:var(--shadow-lg)}
@@ -645,6 +650,11 @@
       </header>
       <div class="items" id="cartItems"></div>
       <div class="order-status" id="orderStatus" role="status" hidden></div>
+      <div class="order-copy" id="orderCopy" hidden>
+        <p>If your email app didn&rsquo;t open, copy your order below and email it to <a href="mailto:abdulsallam0999@gmail.com">abdulsallam0999@gmail.com</a>.</p>
+        <textarea id="orderCopyText" readonly rows="9" aria-label="Your order text"></textarea>
+        <button type="button" class="btn btn-brand" id="copyOrderBtn">Copy Order</button>
+      </div>
       <div class="foot" id="cartFoot">
         <div class="tot"><span>Subtotal</span><span id="subTotal">$0.00</span></div>
         <div class="tot"><span>Shipping</span><span id="delFee">$6.95</span></div>
@@ -1664,7 +1674,10 @@
         if(!form.checkValidity()){ form.reportValidity(); return false; }
         return true;
       }
-      // Order submission — sent to the shop's Formspree inbox (and emailed to the shop)
+      // Order submission — opens the customer's own email app with the order
+      // pre-filled and addressed to the shop, so it lands straight in the
+      // shop's Gmail with no form service in between. The endpoint below is
+      // used by the Complaints form only.
       var ORDER_ENDPOINT = "https://formspree.io/f/moedvdwl";
       var orderStatus = document.getElementById("orderStatus");
       function showOrderStatus(kind, msg){
@@ -1672,48 +1685,42 @@
         orderStatus.textContent = msg;
         orderStatus.hidden = false;
       }
+      var orderCopy = document.getElementById("orderCopy");
+      var orderCopyText = document.getElementById("orderCopyText");
+      document.getElementById("copyOrderBtn").addEventListener("click", function(){
+        function copied(){ toast("Order copied — paste it into an email to " + EMAIL); }
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(orderCopyText.value).then(copied, function(){
+            orderCopyText.select();
+            try{ document.execCommand("copy"); }catch(e){}
+            copied();
+          });
+        } else {
+          orderCopyText.select();
+          try{ document.execCommand("copy"); }catch(e){}
+          copied();
+        }
+      });
       document.getElementById("checkoutForm").addEventListener("submit", function(e){
         e.preventDefault();
         if(!validateOrder()) return;
-        var btn = document.getElementById("placeOrder");
-        var t = totals();
-        var pay = document.querySelector('input[name="pay"]:checked').value;
-        orderStatus.hidden = true;
-        btn.disabled = true;
-        btn.textContent = "Placing order…";
-        var fd = new FormData();
-        fd.append("_subject", "New MINAL order");
-        fd.append("name", document.getElementById("fName").value.trim());
-        fd.append("email", document.getElementById("fEmail").value.trim());
-        fd.append("phone", document.getElementById("fPhone").value.trim());
-        fd.append("street", document.getElementById("fAddr").value.trim());
-        fd.append("city", document.getElementById("fCity").value.trim());
-        fd.append("postcode", document.getElementById("fPostcode").value.trim());
-        fd.append("country", document.getElementById("fCountry").value);
-        fd.append("payment_method", pay);
-        fd.append("order", orderText());
-        fd.append("order_total", money(t.total) + " (" + state.curr + ")");
-        fetch(ORDER_ENDPOINT, {
-          method: "POST",
-          body: fd,
-          headers: { "Accept": "application/json" }
-        }).then(function(res){
-          if(res.ok){
-            cart = {};
-            renderCart();
-            document.getElementById("checkoutForm").reset();
-            syncCartPanels();
-            showOrderStatus("ok", "Thank you! Your order has been received. We'll email you the payment details shortly — please check your inbox to complete your advance payment.");
-            toast("Order received — thank you!");
-          } else {
-            showOrderStatus("err", "Sorry — your order couldn't be sent. Please try again, or email your order to " + EMAIL + " and we'll take care of it.");
-          }
-        }).catch(function(){
-          showOrderStatus("err", "Sorry — your order couldn't be sent. Please check your connection and try again, or email your order to " + EMAIL + " and we'll take care of it.");
-        }).then(function(){
-          btn.disabled = false;
-          btn.textContent = "Place Order";
-        });
+        var text = orderText();
+        // Keep the full order on screen as a fallback in case the email app doesn't open
+        orderCopyText.value = text;
+        orderCopy.hidden = false;
+        var mailLink = document.createElement("a");
+        mailLink.href = "mailto:" + EMAIL +
+          "?subject=" + encodeURIComponent("New MINAL order") +
+          "&body=" + encodeURIComponent(text);
+        document.body.appendChild(mailLink);
+        mailLink.click();
+        document.body.removeChild(mailLink);
+        cart = {};
+        renderCart();
+        document.getElementById("checkoutForm").reset();
+        syncCartPanels();
+        showOrderStatus("ok", "Your order email is ready — just press Send in your email app. We'll reply to confirm your order and payment details.");
+        toast("Order email ready — just press Send");
       });
 
       // Complaint submission — sent to the same Formspree inbox, with its own subject

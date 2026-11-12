@@ -337,6 +337,27 @@
       .pay-opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
       .pay-opt input{width:20px;height:20px;accent-color:var(--accent-btn)}
       .pay-opt small{display:block;font-weight:400;color:var(--ink2)}
+      .pay-bar{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;font:inherit;font-weight:700;min-height:52px;margin-top:16px;cursor:pointer;text-align:left}
+      .pay-bar .pay-bar-sel{font-weight:600;color:var(--accent-ink);margin-left:auto;text-align:right}
+      .pay-bar .pay-bar-chev{color:var(--ink2);transition:transform .2s}
+      .pay-bar.open .pay-bar-chev{transform:rotate(180deg)}
+      .pay-methods{display:grid;gap:8px;margin-top:8px}
+      .pay-methods[hidden]{display:none}
+      .pay-method{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 12px;cursor:pointer;font:inherit;font-weight:600;min-height:48px;text-align:left;width:100%}
+      .pay-method.sel{border-color:var(--accent);background:var(--accent-soft)}
+      .pay-method small{display:block;font-weight:400;color:var(--ink2)}
+      .pay-detail{margin-top:10px;background:var(--accent-soft);border:1px solid #f0c48c;border-radius:var(--radius);padding:12px 14px;font-size:.9rem}
+      .pay-detail[hidden]{display:none}
+      .pay-detail p{margin:0}
+      .proof-box{border:1.5px dashed var(--line-strong);border-radius:10px;padding:12px 14px}
+      .proof-box input[type="file"]{width:100%;font:inherit;color:var(--ink)}
+      .proof-hint{font-size:.82rem;color:var(--ink2);margin:8px 0 0}
+      .proof-file{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.88rem;font-weight:600}
+      .proof-file[hidden]{display:none}
+      .proof-file span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .proof-remove{border:1px solid var(--line-strong);background:var(--surface);color:var(--danger);border-radius:8px;padding:6px 12px;font-weight:600;min-height:36px;flex:none}
+      .place-order-note{margin:0;font-size:.86rem;color:var(--ink2);text-align:center;border:1px dashed var(--line-strong);border-radius:10px;padding:12px 14px;line-height:1.45}
+      .place-order-note[hidden]{display:none}
       .order-btns{display:grid;gap:10px;margin-top:16px}
       .order-btns .btn{justify-content:center;width:100%}
       .order-status{margin:0 18px 14px;border-radius:10px;padding:13px 15px;font-weight:600;font-size:.92rem;line-height:1.45}
@@ -349,6 +370,7 @@
       .order-copy textarea{width:100%;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 12px;font:inherit;font-size:.84rem;resize:vertical}
       .order-copy .btn{margin-top:10px;width:100%;justify-content:center}
       .order-btns .btn[disabled]{opacity:.6;pointer-events:none}
+      .order-btns .btn[hidden]{display:none}
       .cart-empty{text-align:center;color:var(--ink2);padding:30px 0}
       .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,80px);background:#202223;color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;z-index:80;transition:transform .25s;max-width:92vw;text-align:center;box-shadow:var(--shadow-lg)}
       .toast.show{transform:translate(-50%,0)}
@@ -611,7 +633,7 @@
             <button type="submit" class="btn btn-brand" id="sendComplaint">Send Complaint</button>
           </form>
           <div class="complaint-copy" id="complaintCopy" hidden>
-            <p>If your email app didn&rsquo;t open, copy your complaint below and email it to <a href="mailto:abdulsallam0999@gmail.com">abdulsallam0999@gmail.com</a>.</p>
+            <p>We couldn&rsquo;t send your complaint automatically. Copy your complaint below and email it to abdulsallam0999@gmail.com.</p>
             <textarea id="complaintCopyText" readonly rows="7" aria-label="Your complaint text"></textarea>
             <button type="button" class="btn btn-brand" id="copyComplaintBtn">Copy Complaint</button>
           </div>
@@ -674,7 +696,7 @@
       <div class="items" id="cartItems"></div>
       <div class="order-status" id="orderStatus" role="status" hidden></div>
       <div class="order-copy" id="orderCopy" hidden>
-        <p>If your email app didn&rsquo;t open, copy your order below and email it to <a href="mailto:abdulsallam0999@gmail.com">abdulsallam0999@gmail.com</a>.</p>
+        <p>We couldn&rsquo;t send your order automatically. Copy your order below and email it to abdulsallam0999@gmail.com.</p>
         <textarea id="orderCopyText" readonly rows="9" aria-label="Your order text"></textarea>
         <button type="button" class="btn btn-brand" id="copyOrderBtn">Copy Order</button>
       </div>
@@ -699,30 +721,43 @@
           </select>
           <label for="fCity">City</label>
           <input type="text" id="fCity" name="city" required placeholder="e.g. New York / London" />
-          <label for="fAddr">Street Address</label>
+          <label for="fAddr">Complete Address</label>
           <textarea id="fAddr" name="street" rows="2" required placeholder="Street, building, apartment"></textarea>
-          <label for="fPostcode">Postcode / ZIP</label>
-          <input type="text" id="fPostcode" name="postcode" required placeholder="e.g. 10001 / SW1A 1AA" />
 
-          <h3 style="margin-top:16px">Payment Method — Advance Only</h3>
-          <p style="font-size:.84rem;color:var(--ink2);margin:4px 0 8px">Cash on Delivery is <strong>not</strong> available. Pick Binance to see the payment details right here; bank details are shared by email after you send your order.</p>
-          <div class="pay-opts" role="radiogroup" aria-label="Payment method">
-            <label class="pay-opt"><input type="radio" name="pay" value="Bank Transfer" checked /><span>Bank Transfer<small>Advance payment — USA &amp; UK banks</small></span></label>
-            <label class="pay-opt"><input type="radio" name="pay" value="Binance Pay" /><span>Binance Pay<small>Advance payment</small></span></label>
-            <label class="pay-opt"><input type="radio" name="pay" value="Crypto (USDT via Binance)" /><span>Crypto (USDT)<small>Advance payment via Binance</small></span></label>
+          <button type="button" class="pay-bar" id="payBar" aria-expanded="false" aria-controls="payMethods">
+            <span>Payment Method</span>
+            <span class="pay-bar-sel" id="payBarSel"></span>
+            <span class="pay-bar-chev" aria-hidden="true">▾</span>
+          </button>
+          <div class="pay-methods" id="payMethods" role="radiogroup" aria-label="Payment method" hidden>
+            <button type="button" class="pay-method" data-pay="Bank Transfer" role="radio" aria-checked="false">Bank Transfer<small>Advance payment — USA &amp; UK banks</small></button>
+            <button type="button" class="pay-method" data-pay="Binance" role="radio" aria-checked="false">Binance<small>Pay in USDT with Binance Pay</small></button>
           </div>
-
+          <div class="pay-detail" id="bankDetail" hidden>
+            <p>Bank details will be emailed to you after you place your order.</p>
+          </div>
           <div class="binance-panel" id="cartBinancePanel" hidden>
             <h4>Pay with Binance</h4>
             <p class="bp-sub">Send your advance payment to this Binance account:</p>
             <div class="binance-row"><span class="bp-label">Binance Pay ID</span><span class="binance-id">1023368489</span><button type="button" class="copy-btn" data-copy-binance>Copy Pay ID</button></div>
             <div class="binance-row"><span class="bp-label">Account Name</span><span class="binance-name">Abdul Sallam</span></div>
-            <p class="bp-steps">In the Binance app, tap <strong>Pay → Send</strong>, enter the Pay ID above, and send the order total shown here. Then tap “Order by Email” below so we can match your payment and ship.</p>
+            <p class="bp-steps">In the Binance app, tap <strong>Pay → Send</strong>, enter the Pay ID above, and send the order total shown here. Then tap “Place Order” below so we can match your payment and ship.</p>
             <a class="btn btn-brand" href="bnc://app.binance.com">Open Binance App &amp; Pay</a>
           </div>
 
+          <label for="fProof">Payment Proof — Upload Screenshot</label>
+          <div class="proof-box">
+            <input type="file" id="fProof" name="proof" accept="image/*" />
+            <p class="proof-hint">Upload a screenshot of your USDT payment.</p>
+            <div class="proof-file" id="proofFile" hidden>
+              <span id="proofName"></span>
+              <button type="button" class="proof-remove" id="proofRemove">Remove</button>
+            </div>
+          </div>
+
           <div class="order-btns">
-            <button type="submit" class="btn btn-brand" id="placeOrder">Place Order</button>
+            <p class="place-order-note" id="placeOrderNote">The Place Order button will appear here after you upload your payment screenshot.</p>
+            <button type="submit" class="btn btn-brand" id="placeOrder" hidden>Place Order</button>
           </div>
         </form>
       </div>
@@ -1368,6 +1403,16 @@
       ];
 
       var EMAIL = "abdulsallam0999@gmail.com";
+      // Orders and complaints are submitted in-shop to this endpoint (Google Apps Script).
+      var SUBMIT_URL = "https://script.google.com/macros/s/AKfycbz9UiW1uTacRp8jLEoEhiYHdheH145E45ekbGkmsBz_bjAivQtaekJYBvNcPVGGoPY/exec";
+      function submitToShop(payload){
+        return fetch(SUBMIT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(payload)
+        });
+      }
       var FREE_LIMIT = 75, DELIVERY = 6.95;
       var GBP_RATE = 0.79; // display conversion from USD
 
@@ -1683,7 +1728,7 @@
       // Ordering
       function orderText(){
         var t = totals();
-        var pay = document.querySelector('input[name="pay"]:checked').value;
+        var pay = selectedPay;
         var lines = ["Hello! I'd like to order from MINAL:", ""];
         t.items.forEach(function(x){ lines.push("• " + x.p.name + " (" + x.p.size + ") × " + x.qty + " = " + money(x.p.price*x.qty)); });
         lines.push("");
@@ -1698,7 +1743,6 @@
         lines.push("Country: " + document.getElementById("fCountry").value);
         lines.push("City: " + document.getElementById("fCity").value.trim());
         lines.push("Street Address: " + document.getElementById("fAddr").value.trim());
-        lines.push("Postcode / ZIP: " + document.getElementById("fPostcode").value.trim());
         lines.push("Payment Method (Advance): " + pay);
         if(pay.indexOf("Binance") > -1){
           lines.push("Binance Pay ID: 1023368489 (Name: Abdul Sallam)");
@@ -1714,9 +1758,8 @@
         if(!form.checkValidity()){ form.reportValidity(); return false; }
         return true;
       }
-      // Order submission — opens the customer's own email app with the order
-      // pre-filled and addressed to the shop, so it lands straight in the
-      // shop's Gmail with no form service in between.
+      // Order submission — sent in-shop with fetch to the shop's endpoint.
+      // The customer's email app never opens; one click places the order.
       var orderStatus = document.getElementById("orderStatus");
       function showOrderStatus(kind, msg){
         orderStatus.className = "order-status " + kind;
@@ -1739,31 +1782,162 @@
           copied();
         }
       });
+      // Payment method bar: tapping it expands the two methods. Picking one
+      // closes the list and opens that method's details right below the bar;
+      // the chosen method is sent as `payment` in the order JSON.
+      var selectedPay = "";
+      var proofDataUrl = "";
+      var proofFileName = "";
+      var payBar = document.getElementById("payBar");
+      var payBarSel = document.getElementById("payBarSel");
+      var payMethods = document.getElementById("payMethods");
+      var bankDetail = document.getElementById("bankDetail");
+      var cartBinancePanel = document.getElementById("cartBinancePanel");
+      var placeOrderBtn = document.getElementById("placeOrder");
+      var placeOrderNote = document.getElementById("placeOrderNote");
+      function setPayMethods(open){
+        payMethods.hidden = !open;
+        payBar.setAttribute("aria-expanded", open ? "true" : "false");
+        payBar.classList.toggle("open", open);
+      }
+      payBar.addEventListener("click", function(){ setPayMethods(payMethods.hidden); });
+      function selectPay(method){
+        selectedPay = method;
+        payBarSel.textContent = method;
+        document.querySelectorAll(".pay-method").forEach(function(b){
+          var on = b.getAttribute("data-pay") === method;
+          b.classList.toggle("sel", on);
+          b.setAttribute("aria-checked", on ? "true" : "false");
+        });
+        bankDetail.hidden = method !== "Bank Transfer";
+        cartBinancePanel.hidden = method !== "Binance";
+        setPayMethods(false);
+      }
+      document.querySelectorAll(".pay-method").forEach(function(b){
+        b.addEventListener("click", function(){ selectPay(b.getAttribute("data-pay")); });
+      });
+      function resetPaymentUI(){
+        selectedPay = "";
+        payBarSel.textContent = "";
+        document.querySelectorAll(".pay-method").forEach(function(b){
+          b.classList.remove("sel");
+          b.setAttribute("aria-checked", "false");
+        });
+        bankDetail.hidden = true;
+        cartBinancePanel.hidden = true;
+        setPayMethods(false);
+      }
+      // Payment proof: screenshot upload (images only). The Place Order
+      // button stays hidden until a screenshot is chosen, and hides again
+      // if the file is removed. The image is compressed in the browser
+      // (max 1200px wide, JPEG quality 0.8) before it is sent.
+      var proofInput = document.getElementById("fProof");
+      var proofFileRow = document.getElementById("proofFile");
+      var proofName = document.getElementById("proofName");
+      function clearProof(){
+        proofDataUrl = "";
+        proofFileName = "";
+        proofInput.value = "";
+        proofFileRow.hidden = true;
+        proofName.textContent = "";
+        placeOrderBtn.hidden = true;
+        placeOrderNote.hidden = false;
+      }
+      function compressProof(file){
+        return new Promise(function(resolve){
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+          img.onload = function(){
+            var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+            var scale = w > 1200 ? 1200 / w : 1;
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(w * scale));
+            canvas.height = Math.max(1, Math.round(h * scale));
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            resolve(canvas.toDataURL("image/jpeg", 0.8));
+          };
+          img.onerror = function(){ URL.revokeObjectURL(url); resolve(""); };
+          img.src = url;
+        });
+      }
+      proofInput.addEventListener("change", function(){
+        var file = proofInput.files && proofInput.files[0];
+        if(!file){ clearProof(); return; }
+        if(file.type.indexOf("image/") !== 0){ clearProof(); toast("Please choose an image screenshot"); return; }
+        proofFileName = file.name;
+        proofName.textContent = file.name;
+        proofFileRow.hidden = false;
+        compressProof(file).then(function(dataUrl){
+          proofDataUrl = dataUrl;
+          placeOrderBtn.hidden = !dataUrl;
+          placeOrderNote.hidden = !!dataUrl;
+          if(!dataUrl) toast("That image could not be read — please try another screenshot");
+        });
+      });
+      document.getElementById("proofRemove").addEventListener("click", clearProof);
       document.getElementById("checkoutForm").addEventListener("submit", function(e){
         e.preventDefault();
         if(!validateOrder()) return;
+        var t = totals();
+        var pay = selectedPay;
+        if(!pay){
+          setPayMethods(true);
+          payBar.scrollIntoView({block:"center", behavior:"smooth"});
+          toast("Please choose a payment method");
+          return;
+        }
+        if(!proofDataUrl){
+          toast("Please upload your payment proof screenshot");
+          return;
+        }
+        var payload = {
+          type: "order",
+          items: t.items.map(function(x){ return { name: x.p.name, qty: x.qty, total: Math.round(x.p.price * x.qty * 100) / 100 }; }),
+          subtotal: Math.round(t.sub * 100) / 100,
+          shipping: Math.round(t.del * 100) / 100,
+          total: Math.round(t.total * 100) / 100,
+          name: document.getElementById("fName").value.trim(),
+          email: document.getElementById("fEmail").value.trim(),
+          phone: document.getElementById("fPhone").value.trim(),
+          country: document.getElementById("fCountry").value,
+          city: document.getElementById("fCity").value.trim(),
+          address: document.getElementById("fAddr").value.trim(),
+          payment: pay,
+          proofImage: proofDataUrl,
+          proofFileName: proofFileName
+        };
         var text = orderText();
-        // Keep the full order on screen as a fallback in case the email app doesn't open
-        orderCopyText.value = text;
-        orderCopy.hidden = false;
-        var mailLink = document.createElement("a");
-        mailLink.href = "mailto:" + EMAIL +
-          "?subject=" + encodeURIComponent("New MINAL order") +
-          "&body=" + encodeURIComponent(text);
-        document.body.appendChild(mailLink);
-        mailLink.click();
-        document.body.removeChild(mailLink);
-        cart = {};
-        renderCart();
-        document.getElementById("checkoutForm").reset();
-        syncCartPanels();
-        showOrderStatus("ok", "Your order email is ready — just press Send in your email app. We'll reply to confirm your order and payment details.");
-        toast("Order email ready — just press Send");
+        var btn = document.getElementById("placeOrder");
+        btn.disabled = true;
+        btn.textContent = "Placing order…";
+        orderCopy.hidden = true;
+        submitToShop(payload).then(function(){
+          cart = {};
+          renderCart();
+          document.getElementById("checkoutForm").reset();
+          resetPaymentUI();
+          clearProof();
+          btn.disabled = false;
+          btn.hidden = true;
+          placeOrderNote.hidden = false;
+          btn.textContent = "Place Order";
+          showOrderStatus("ok", "Your order has been placed! Your order will be confirmed after we verify your USDT payment. We'll email you shortly.");
+          toast("Order placed — thank you!");
+        }, function(){
+          btn.disabled = false;
+          btn.textContent = "Place Order";
+          // Fallback only if the send itself failed: show the full order
+          // text with a Copy button so the customer can email it manually.
+          orderCopyText.value = text;
+          orderCopy.hidden = false;
+          showOrderStatus("err", "Sorry — your order couldn't be sent. Please copy it below and email it to " + EMAIL + ".");
+          toast("Couldn't send your order — please copy it below");
+        });
       });
 
-      // Complaint submission — opens the customer's own email app with the
-      // complaint pre-filled and addressed to the shop, so it lands straight
-      // in the shop's Gmail with no form service in between.
+      // Complaint submission — sent in-shop with fetch to the same endpoint
+      // as orders. The customer's email app never opens.
       var complaintForm = document.getElementById("complaintForm");
       var complaintStatus = document.getElementById("complaintStatus");
       function showComplaintStatus(kind, msg){
@@ -1802,20 +1976,35 @@
       complaintForm.addEventListener("submit", function(e){
         e.preventDefault();
         if(!complaintForm.checkValidity()){ complaintForm.reportValidity(); return; }
+        var payload = {
+          type: "complaint",
+          name: document.getElementById("cName").value.trim(),
+          email: document.getElementById("cEmail").value.trim(),
+          orderRef: document.getElementById("cOrderRef").value.trim(),
+          complaintType: document.getElementById("cType").value,
+          message: document.getElementById("cMessage").value.trim()
+        };
         var text = complaintText();
-        // Keep the full complaint on screen as a fallback in case the email app doesn't open
-        complaintCopyText.value = text;
-        complaintCopy.hidden = false;
-        var mailLink = document.createElement("a");
-        mailLink.href = "mailto:" + EMAIL +
-          "?subject=" + encodeURIComponent("New MINAL complaint") +
-          "&body=" + encodeURIComponent(text);
-        document.body.appendChild(mailLink);
-        mailLink.click();
-        document.body.removeChild(mailLink);
-        complaintForm.reset();
-        showComplaintStatus("ok", "Your complaint email is ready — just press Send in your email app. We'll reply by email.");
-        toast("Complaint email ready — just press Send");
+        var btn = document.getElementById("sendComplaint");
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+        complaintCopy.hidden = true;
+        submitToShop(payload).then(function(){
+          complaintForm.reset();
+          btn.disabled = false;
+          btn.textContent = "Send Complaint";
+          showComplaintStatus("ok", "Your complaint has been sent. We'll reply by email.");
+          toast("Complaint sent — we'll reply by email");
+        }, function(){
+          btn.disabled = false;
+          btn.textContent = "Send Complaint";
+          // Fallback only if the send itself failed: show the full complaint
+          // text with a Copy button so the customer can email it manually.
+          complaintCopyText.value = text;
+          complaintCopy.hidden = false;
+          showComplaintStatus("err", "Sorry — your complaint couldn't be sent. Please copy it below and email it to " + EMAIL + ".");
+          toast("Couldn't send your complaint — please copy it below");
+        });
       });
 
       // Binance payment details — copy button, page panel toggle, cart panel
@@ -1850,15 +2039,6 @@
           showBinanceBtn.textContent = opening ? "Hide Binance Details" : "Pay with Binance";
         });
       }
-      var cartBinancePanel = document.getElementById("cartBinancePanel");
-      function syncCartPanels(){
-        var checked = document.querySelector('input[name="pay"]:checked');
-        if(cartBinancePanel) cartBinancePanel.hidden = !(checked && checked.value.indexOf("Binance") > -1);
-      }
-      document.querySelectorAll('input[name="pay"]').forEach(function(r){
-        r.addEventListener("change", syncCartPanels);
-      });
-      syncCartPanels();
 
       // Hero slideshow — auto-rotates, with arrows, dots and swipe
       (function(){

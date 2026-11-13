@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
     <link rel="icon" href="data:," />
+    <!-- PWA: installable app (manifest, icons and service worker served from the site root) -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#fd6a0e" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
     <title>MINAL — Pets, Home &amp; Everyday Essentials | USA &amp; UK</title>
     <meta name="description" content="Quality-checked small & lightweight products — dog and cat favourites plus home & kitchen, electronics, beauty & personal care, fashion, mobile accessories, home decor, smart home, fitness, kids, toys & games, sports & outdoors, baby, automotive, office, garden and tools — with shipping across the USA and UK. Order by email." />
     <link rel="canonical" href="https://minalshop.com/" />

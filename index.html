@@ -1857,6 +1857,34 @@
         }catch(e){}
       }
 
+      // Search tracking — logs what visitors search for so the owner can see
+      // which products are in demand (including zero-result searches, which
+      // show demand for products not listed yet). Sends the standard GA4
+      // 'search' event and a copy to the shop's backend log. Only the search
+      // term and the number of matching products are sent — no personal
+      // data. Fire-and-forget: a blocked gtag or a failed POST never breaks
+      // or slows down searching.
+      var lastResultCount = 0;
+      var lastTrackedTerm = "";
+      var searchTrackTimer = null;
+      function trackSearch(raw){
+        try{
+          var term = String(raw == null ? "" : raw).trim().toLowerCase();
+          if(!term || term === lastTrackedTerm) return;
+          lastTrackedTerm = term;
+          var results = lastResultCount;
+          try{
+            if(typeof gtag === "function"){
+              gtag("event", "search", { search_term: term, results: results });
+            }
+          }catch(e){}
+          try{
+            var sent = submitToShop({ type: "search", term: term, results: results });
+            if(sent && typeof sent.catch === "function") sent.catch(function(){});
+          }catch(e){}
+        }catch(e){}
+      }
+
       var grid = document.getElementById("grid");
       function render(){
         var list = PRODUCTS.filter(function(p){
@@ -1877,6 +1905,7 @@
           });
           return out;
         })();
+        lastResultCount = list.length;
         if(state.sort==="low") list = list.slice().sort(function(a,b){return a.price-b.price});
         if(state.sort==="high") list = list.slice().sort(function(a,b){return b.price-a.price});
         if(state.sort==="name") list = list.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
@@ -2112,7 +2141,24 @@
           }
         });
       });
-      document.getElementById("searchInput").addEventListener("input", function(e){ state.q = e.target.value.trim().toLowerCase(); pageLimit = PAGE_SIZE; render(); });
+      var searchInputEl = document.getElementById("searchInput");
+      searchInputEl.addEventListener("input", function(e){
+        state.q = e.target.value.trim().toLowerCase(); pageLimit = PAGE_SIZE; render();
+        // Track the search once the visitor pauses typing (~800ms), and
+        // reset the de-dupe when the box is cleared so a later repeat of the
+        // same term counts as a fresh search.
+        if(searchTrackTimer) clearTimeout(searchTrackTimer);
+        if(!state.q){ lastTrackedTerm = ""; return; }
+        searchTrackTimer = setTimeout(function(){ trackSearch(searchInputEl.value); }, 800);
+      });
+      searchInputEl.addEventListener("keydown", function(e){
+        // Enter submits the search — track it straight away.
+        if(e.key === "Enter"){
+          e.preventDefault();
+          if(searchTrackTimer) clearTimeout(searchTrackTimer);
+          trackSearch(e.target.value);
+        }
+      });
       document.getElementById("sortSel").addEventListener("change", function(e){ state.sort = e.target.value; pageLimit = PAGE_SIZE; render(); });
 
       // Ordering

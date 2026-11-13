@@ -81,6 +81,7 @@
       /* Announcement bar */
       .promo{background:#202223;color:#fff;text-align:center;font-weight:500;font-size:.85rem;letter-spacing:.02em;padding:8px 16px}
       .promo b{font-weight:700;white-space:nowrap}
+      .promo-offer{background:var(--accent);color:#fff;text-align:center;font-weight:700;font-size:.95rem;letter-spacing:.01em;padding:9px 16px}
 
       /* Header */
       .topbar{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -363,6 +364,8 @@
       .drawer .foot{border-top:1px solid var(--line);padding:16px 18px;background:var(--surface)}
       .tot{display:flex;justify-content:space-between;font-size:.95rem;padding:2px 0}
       .tot.grand{font-size:1.15rem;font-weight:700;border-top:1px solid var(--line);margin-top:8px;padding-top:10px}
+      .tot.discount{color:var(--green);font-weight:600}
+      .tot.discount[hidden]{display:none}
       .free-note{font-size:.84rem;color:var(--green);font-weight:600}
       .checkout{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
       .checkout h3{font-size:1.02rem;margin-bottom:10px;font-weight:700}
@@ -434,6 +437,7 @@
       <div class="welcome-bar" aria-hidden="true"></div>
     </div>
     <div class="promo">Free shipping on orders over $75 — <b>USA &amp; UK</b></div>
+    <div class="promo-offer">🎉 Buy 10, Get 1 FREE — add 10 products to your cart and 1 is on us!</div>
     <!-- Top bar -->
     <div class="topbar">
       <div class="wrap topbar-in">
@@ -714,6 +718,7 @@
       </div>
       <div class="foot" id="cartFoot">
         <div class="tot"><span>Subtotal</span><span id="subTotal">$0.00</span></div>
+        <div class="tot discount" id="discountRow" hidden><span>Buy 10 Get 1 Free discount</span><span id="discountAmt">-$0.00</span></div>
         <div class="tot"><span>Shipping</span><span id="delFee">$6.95</span></div>
         <p class="free-note" id="freeNote"></p>
         <div class="tot grand"><span>Total</span><span id="grandTotal">$0.00</span></div>
@@ -2079,9 +2084,13 @@
       }
       function totals(){
         var items = cartList();
-        var sub = items.reduce(function(s,x){return s + x.p.price*x.qty},0);
+        var gross = items.reduce(function(s,x){return s + x.p.price*x.qty},0);
+        var count = items.reduce(function(s,x){return s+x.qty},0);
+        // Buy 10, Get 1 FREE: one $50.00 item free for every 10 items in the cart.
+        var discount = Math.floor(count/10) * 50;
+        var sub = gross - discount;
         var del = items.length===0 ? 0 : (sub>=FREE_LIMIT ? 0 : DELIVERY);
-        return {items:items, sub:sub, del:del, total:sub+del, count:items.reduce(function(s,x){return s+x.qty},0)};
+        return {items:items, gross:gross, discount:discount, sub:sub, del:del, total:sub+del, count:count};
       }
       function renderCart(){
         var t = totals();
@@ -2100,7 +2109,14 @@
           box.querySelectorAll("[data-dec]").forEach(function(b){ b.addEventListener("click", function(){ var id=b.getAttribute("data-dec"); cart[id]--; if(cart[id]<=0) delete cart[id]; renderCart(); }); });
           box.querySelectorAll("[data-rm]").forEach(function(b){ b.addEventListener("click", function(){ delete cart[b.getAttribute("data-rm")]; renderCart(); }); });
         }
-        document.getElementById("subTotal").textContent = money(t.sub);
+        document.getElementById("subTotal").textContent = money(t.gross);
+        var discountRow = document.getElementById("discountRow");
+        if(t.discount > 0){
+          discountRow.hidden = false;
+          document.getElementById("discountAmt").textContent = "-" + money(t.discount);
+        } else {
+          discountRow.hidden = true;
+        }
         document.getElementById("delFee").textContent = t.items.length===0 ? money(0) : (t.del===0 ? "FREE" : money(t.del));
         document.getElementById("grandTotal").textContent = money(t.total);
         var payAmtText = "Amount to pay: $" + t.total.toFixed(2);
@@ -2223,7 +2239,8 @@
         var lines = ["Hello! I'd like to order from MINAL:", ""];
         t.items.forEach(function(x){ lines.push("• " + x.p.name + " (" + x.p.size + ") × " + x.qty + " = " + money(x.p.price*x.qty)); });
         lines.push("");
-        lines.push("Subtotal: " + money(t.sub));
+        lines.push("Subtotal: " + money(t.gross));
+        if(t.discount > 0) lines.push("Buy 10 Get 1 Free discount: -" + money(t.discount));
         lines.push("Shipping: " + (t.del===0 ? "FREE" : money(t.del)));
         lines.push("Total: " + money(t.total) + " (" + state.curr + ")");
         lines.push("");
@@ -2347,6 +2364,7 @@
           type: "order",
           items: t.items.map(function(x){ return { name: x.p.name, qty: x.qty, total: Math.round(x.p.price * x.qty * 100) / 100 }; }),
           subtotal: Math.round(t.sub * 100) / 100,
+          discount: Math.round(t.discount * 100) / 100,
           shipping: Math.round(t.del * 100) / 100,
           total: Math.round(t.total * 100) / 100,
           name: document.getElementById("fName").value.trim(),

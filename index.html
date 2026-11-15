@@ -93,9 +93,6 @@
       .search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(253,106,14,.18);color:var(--ink)}
       .search input{flex:1;border:0;background:transparent;color:var(--ink);font:inherit;outline:none;min-width:0}
       .search input::placeholder{color:var(--ink2)}
-      .curr{display:flex;border:1px solid var(--line-strong);border-radius:999px;overflow:hidden;flex:none;background:var(--surface)}
-      .curr button{border:0;background:var(--surface);color:var(--ink2);padding:8px 14px;font-weight:600;min-height:42px}
-      .curr button[aria-pressed="true"]{background:var(--ink);color:#fff}
       .cart-btn{position:relative;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 18px;font-weight:600;display:flex;align-items:center;gap:8px;min-height:44px}
       .cart-btn:hover{border-color:var(--ink)}
       .app-btn{border:1px solid #fd6a0e;color:#fd6a0e;background:var(--surface);border-radius:8px;padding:10px 14px;font-weight:600;display:flex;align-items:center;gap:7px;min-height:44px;text-decoration:none;flex:none;white-space:nowrap}
@@ -464,10 +461,6 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
           <input id="searchInput" type="search" placeholder="Search toys, beds, kitchen, tech, garden…" aria-label="Search products" />
         </label>
-        <div class="curr" role="group" aria-label="Currency">
-          <button type="button" data-curr="USD" aria-pressed="true">$ USD</button>
-          <button type="button" data-curr="GBP" aria-pressed="false">£ GBP</button>
-        </div>
         <a class="app-btn" href="/minal-app.apk" download aria-label="Download our Android app">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg>
           <span class="app-label-full">Download App</span><span class="app-label-short">App</span>
@@ -553,7 +546,7 @@
       <!-- Shop -->
       <section id="shop" aria-label="Products">
         <div class="sec-head">
-          <div><h2>Pets, Home &amp; Everyday Essentials</h2><p>Pet toys, grooming, beds and essentials, plus home &amp; kitchen, tech accessories, beauty, fashion, mobile accessories, home decor, smart home, fitness, kids, games, sports, baby, car, office, garden and tool favourites — every item small, lightweight and quality-checked before dispatch. Prices are in USD — switch to GBP (£) at the top.</p></div>
+          <div><h2>Pets, Home &amp; Everyday Essentials</h2><p>Pet toys, grooming, beds and essentials, plus home &amp; kitchen, tech accessories, beauty, fashion, mobile accessories, home decor, smart home, fitness, kids, games, sports, baby, car, office, garden and tool favourites — every item small, lightweight and quality-checked before dispatch. All prices are in USD ($).</p></div>
         </div>
         <div class="filters" role="group" aria-label="Filter products">
           <button class="chip" data-pet="all" aria-pressed="true">All Pets</button>
@@ -1937,9 +1930,8 @@
       }
       function shipInfo(country){ return SHIPPING[country] || SHIPPING["United States"]; }
       function deliveryFeeFor(country){ return shipInfo(country).fee; }
-      var GBP_RATE = 0.79; // display conversion from USD
 
-      var state = { pet:"all", cat:"all", q:"", sort:"featured", curr:"USD", favOnly:false };
+      var state = { pet:"all", cat:"all", q:"", sort:"featured", favOnly:false };
       // Pagination — only the first PAGE_SIZE matching products are rendered;
       // "Load more" reveals the next batch so the first paint stays fast.
       var PAGE_SIZE = 24;
@@ -1977,7 +1969,7 @@
       }
 
       function money(n){
-        return state.curr === "GBP" ? "£" + (n * GBP_RATE).toFixed(2) : "$" + n.toFixed(2);
+        return "$" + n.toFixed(2);
       }
       function petLabel(p){ return p==="dog" ? "Dog" : p==="cat" ? "Cat" : p==="general" ? "Everyday" : "Dog & Cat"; }
       function catLabel(c){ return {toys:"Toys",grooming:"Grooming",beds:"Beds",accessories:"Accessories",essentials:"Essentials",home:"Home & Kitchen",electronics:"Electronics",beauty:"Beauty & Care",games:"Toys & Games",sports:"Sports & Outdoors",baby:"Baby",auto:"Automotive",office:"Office",garden:"Garden",fashion:"Fashion",mobile:"Mobile Accessories",decor:"Home Decor",smarthome:"Smart Home",fitness:"Fitness",kids:"Kids",tools:"Tools"}[c] || c; }
@@ -2288,16 +2280,6 @@
       scrim.addEventListener("click", closeCart);
       document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ closeCart(); closeDetail(); } });
 
-      // Currency toggle
-      document.querySelectorAll("[data-curr]").forEach(function(b){
-        b.addEventListener("click", function(){
-          state.curr = b.getAttribute("data-curr");
-          document.querySelectorAll("[data-curr]").forEach(function(c){ c.setAttribute("aria-pressed", c===b ? "true" : "false"); });
-          render(); renderCart();
-          if(pmodal.classList.contains("open")) renderDetail();
-        });
-      });
-
       // Filters — all pet and category chips share ONE active state: exactly
       // one chip in the whole filter row is ever pressed. setActiveFilter()
       // is the single place that writes the pressed state, so no handler can
@@ -2390,7 +2372,7 @@
         if(t.discount > 0) lines.push("Buy 5 Get 1 Free discount: -" + money(t.discount));
         lines.push("Shipping: " + (t.del===0 ? "FREE" : money(t.del)));
         lines.push("Estimated delivery: " + shipInfo(selectedCountry()).eta + " (" + selectedCountry() + ")");
-        lines.push("Total: " + money(t.total) + " (" + state.curr + ")");
+        lines.push("Total: " + money(t.total) + " (USD)");
         lines.push("");
         lines.push("Name: " + document.getElementById("fName").value.trim());
         lines.push("Email: " + document.getElementById("fEmail").value.trim());

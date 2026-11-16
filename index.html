@@ -53,7 +53,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <style>
       :root{
         --bg:#ffffff; --bg-soft:#f6f6f7; --surface:#ffffff; --surface2:#f6f6f7;
@@ -705,7 +705,7 @@
         </div>
         <div class="visitor-counter" id="visitorCounter">
           <span>Visitors</span>
-          <a href="https://analytics.google.com/" target="_blank" rel="noopener" title="View analytics" aria-label="View analytics"><img id="visitorBadge" src="https://hits.sh/minalshop.com.svg" alt="Visitor count" loading="lazy" onerror="document.getElementById('visitorCounter').style.display='none'" onload="if(this.naturalWidth===0){document.getElementById('visitorCounter').style.display='none'}" /></a>
+          <a href="https://analytics.google.com/" target="_blank" rel="noopener" title="View analytics" aria-label="View analytics"><img id="visitorBadge" data-src="https://hits.sh/minalshop.com.svg" alt="Visitor count" loading="lazy" onerror="document.getElementById('visitorCounter').style.display='none'" onload="if(this.naturalWidth===0){document.getElementById('visitorCounter').style.display='none'}" /></a>
         </div>
       </div>
     </footer>
@@ -2695,6 +2695,23 @@
           }, 480);
         }
         setTimeout(dismiss, 2000);
+      })();
+    </script>
+    <script>
+      /* Visitor badge: load only after the page has opened, so a slow hits.sh never delays the shop */
+      (function () {
+        var loaded = false;
+        function loadBadge() {
+          if (loaded) return;
+          loaded = true;
+          var b = document.getElementById('visitorBadge');
+          if (b && b.getAttribute('data-src')) b.src = b.getAttribute('data-src');
+        }
+        if (document.readyState === 'complete') loadBadge();
+        else {
+          window.addEventListener('load', loadBadge);
+          setTimeout(loadBadge, 2500);
+        }
       })();
     </script>
   </body>
